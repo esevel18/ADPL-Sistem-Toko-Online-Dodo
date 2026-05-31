@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.adpl.t04.kelompok5.tokoonline.Transaction;
-import com.adpl.t04.kelompok5.tokoonline.Decorator.TransactionItem;
 import com.adpl.t04.kelompok5.tokoonline.FactoryMethod.Product;
 
 // koneksi database hanya boleh satu instance saja
