@@ -3,7 +3,7 @@ package com.adpl.t04.kelompok5.tokoonline.Singleton;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.adpl.t04.kelompok5.tokoonline.Transaction;
+import com.adpl.t04.kelompok5.tokoonline.Builder.Transaction;
 import com.adpl.t04.kelompok5.tokoonline.FactoryMethod.Product;
 
 // koneksi database hanya boleh satu instance saja
@@ -77,6 +77,13 @@ public class DatabaseConnection {
             }
         }
         return false;
+    }
+
+    public DatabaseConnection getCopyOfDatabase(){
+        DatabaseConnection copy = new DatabaseConnection();
+        copy.products = new ArrayList<>(this.products);
+        copy.transactionHistory = new ArrayList<>(this.transactionHistory);
+        return copy;
     }
 
     // ================= TRANSACTION HISTORY =================

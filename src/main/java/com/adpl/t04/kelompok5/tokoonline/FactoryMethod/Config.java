@@ -1,6 +1,5 @@
-package com.adpl.t04.kelompok5.tokoonline;
+package com.adpl.t04.kelompok5.tokoonline.FactoryMethod;
 
-import com.adpl.t04.kelompok5.tokoonline.FactoryMethod.*;
 import com.adpl.t04.kelompok5.tokoonline.Singleton.DatabaseConnection;
 
 // data to load before app start
@@ -9,7 +8,7 @@ public class Config {
     public static void loadData() {
         DatabaseConnection database = DatabaseConnection.getInstance();
 
-        // factory method
+        // factory design pattern
         ProductCreator electronicCreator = new ElectronicCreator();
         ProductCreator groceryCreator = new GroceryCreator();
         ProductCreator bookCreator = new BookCreator();

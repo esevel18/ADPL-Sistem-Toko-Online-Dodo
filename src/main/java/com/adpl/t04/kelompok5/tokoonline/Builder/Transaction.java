@@ -1,4 +1,4 @@
-package com.adpl.t04.kelompok5.tokoonline;
+package com.adpl.t04.kelompok5.tokoonline.Builder;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -7,6 +7,12 @@ import com.adpl.t04.kelompok5.tokoonline.Decorator.ItemComponent;
 import com.adpl.t04.kelompok5.tokoonline.Strategy.DeliveryContext;
 import com.adpl.t04.kelompok5.tokoonline.Strategy.PaymentContext;
 
+// builder 
+// The Builder Pattern separates the construction of a complex object from its representation, 
+// allowing the same construction process to create different representations.
+
+// reason: parameter semakin banyak yang harus dimasukkan saat creational
+// It helps in creating immutable objects in a clean and readable way.
 public class Transaction {
     private List<ItemComponent> items;
     private DeliveryContext deliveryStrategy;
@@ -25,7 +31,6 @@ public class Transaction {
         this.subtotal = subtotal;
         this.deliveryFee = deliveryFee;
         this.total = total;
-
         this.transactionDate = LocalDateTime.now();
     }
 
@@ -47,8 +52,8 @@ public class Transaction {
         sb.append("--------------------------------\n");
         sb.append("TOTAL : Rp " + total + "\n");
 
-        sb.append("Tanggal : " + transactionDate);
-
+        sb.append("Tanggal : " + transactionDate + "\n");
+        sb.append("=====================================\n");
         return sb.toString();
     }
 }

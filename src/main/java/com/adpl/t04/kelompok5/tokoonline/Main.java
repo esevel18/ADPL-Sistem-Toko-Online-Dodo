@@ -1,21 +1,27 @@
 package com.adpl.t04.kelompok5.tokoonline;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Scanner;
 
 import com.adpl.t04.kelompok5.tokoonline.Command.*;
 import com.adpl.t04.kelompok5.tokoonline.Decorator.*;
-import com.adpl.t04.kelompok5.tokoonline.Strategy.*;
+import com.adpl.t04.kelompok5.tokoonline.Facade.CheckoutFacade;
+import com.adpl.t04.kelompok5.tokoonline.FactoryMethod.Config;
 import com.adpl.t04.kelompok5.tokoonline.FactoryMethod.Product;
 import com.adpl.t04.kelompok5.tokoonline.Singleton.DatabaseConnection;
 
-public class Main {
+/*
+    LIMITASI PROGRAM KAMI:
+    - Program tidak bisa berjalan mundur, artinya ketika user sudah di halaman checkout, ia tidak
+      bisa kembali ke halaman pemilihan produk
+    - Program tidak bisa update tampilan stok produk secara realtime (saat user sedang meng-query), karena update
+      baru akan terjadi pada akhir checkout
+*/
 
+public class Main {
     public static void main(String[] args) {
-        // singleton 
+        // singleton agar hanya ada satu instansi yang konde ke db
         DatabaseConnection database = DatabaseConnection.getInstance();
-        // factory method
+        // factory method untuk creational data product yang ada di store
         Config.loadData();
 
         Scanner sc = new Scanner(System.in);
@@ -47,8 +53,9 @@ public class Main {
                     database.showProduct();
 
                     System.out.println();
-                    System.out.println("Ketik '$' untuk melihat keranjang / checkout");
-
+                    System.out.println("Ketik '$' untuk melihat keranjang dan checkout");
+                    // update stock realtime (state yang jika user checkout batal, database asli tidak keganti)
+                    DatabaseConnection copyOfDatabase = database.getCopyOfDatabase();
                     while (true) {
                         System.out.print("Pilih produk yang diinginkan: ");
                         String productCode = sc.nextLine().trim().toLowerCase();
@@ -57,38 +64,36 @@ public class Main {
                             break;
                         }
 
+                        int id;
+                        try {
+                            id = Integer.parseInt(productCode);
+                        } catch (Exception e) {
+                            System.out.println("Input harus sesuai nomor yang tertera!!");
+                            continue;
+                        }
+
+                        Product product;
+                        product = database.findProductById(id);
+                        if(product == null){
+                            System.out.println("Produk tidak ditemukan, silahkan pilih kembali..");
+                            continue;
+                        }
+                        
                         System.out.print("Berapa banyak yang diinginkan: ");
                         int amount;
 
                         try {
                             amount = Integer.parseInt(sc.nextLine());
-
                             if (amount <= 0) {
                                 System.out.println("Jumlah harus lebih dari 0!");
                                 continue;
+                            } else if(amount > product.getStock()){
+                                System.out.println("Jumlah permintaan melebihi stok!");
+                                continue;
                             }
-
+                            copyOfDatabase.updateProductStock(product, amount);
                         } catch (NumberFormatException e) {
                             System.out.println("Jumlah harus berupa angka!");
-                            continue;
-                        }
-
-                        Product product;
-
-                        try {
-                            product = database.findProductById(Integer.parseInt(productCode));
-                        } catch (NumberFormatException e) {
-                            System.out.println("ID produk harus angka!");
-                            continue;
-                        }
-
-                        if (product == null) {
-                            System.out.println("Produk tidak ditemukan!");
-                            continue;
-                        }
-
-                        if (product.getStock() < amount) {
-                            System.out.println("Stock tidak mencukupi!");
                             continue;
                         }
 
@@ -102,7 +107,6 @@ public class Main {
                     }
 
                     // ================= CART =================
-
                     System.out.println();
                     System.out.println("============== KERANJANG ==============");
 
@@ -113,17 +117,17 @@ public class Main {
                     System.out.println("============== CHECKOUT ==============");
 
                     // Transaction item yang sudah dibuat akan dibungkus dengan beberapa behavior tambahan
-                    // bungkus kado, garansi, strategi pembayaran dan strategi pengiriman
+                    // yaitu bungkus kado dan garansi
 
                     // decorator
                     System.out.print("Gunakan bungkus kado? (y/n): ");
-                    String kado = sc.nextLine().trim().toLowerCase();
+                    String giftWrapper = sc.nextLine().trim().toLowerCase();
 
-                    while (!kado.equals("y") && !kado.equals("n")) {
+                    while (!giftWrapper.equals("y") && !giftWrapper.equals("n")) {
                         System.out.println("Input tidak valid!");
                         System.out.println();
                         System.out.print("Gunakan bungkus kado? (y/n): ");
-                        kado = sc.nextLine().trim().toLowerCase();
+                        giftWrapper = sc.nextLine().trim().toLowerCase();
                     }
 
                     System.out.print("Tambahkan garansi pecah belah? (y/n): ");
@@ -135,7 +139,7 @@ public class Main {
                         guarantee = sc.nextLine().trim().toLowerCase();
                     }
 
-                    // Strategy
+                    // Strategy pengiriman dan pembayaran
                     System.out.println();
                     System.out.println("Pilih pengiriman:");
                     System.out.println("1. Regular");
@@ -176,68 +180,39 @@ public class Main {
 
                     System.out.println();
                     System.out.print("Lakukan checkout? (y/n): ");
-                    String checkout = sc.nextLine().trim().toLowerCase();
+                    String checkoutStatus = sc.nextLine().trim().toLowerCase();
 
-                    while (!checkout.equals("y") && !checkout.equals("n")) {
+                    while (!checkoutStatus.equals("y") && !checkoutStatus.equals("n")) {
                         System.out.println("Input tidak valid!");
                         System.out.println();
                         System.out.print("Lakukan checkout? (y/n): ");
-                        checkout = sc.nextLine().trim().toLowerCase();
+                        checkoutStatus = sc.nextLine().trim().toLowerCase();
                     }
 
-                    if (checkout.equals("y")) {
-                        List<ItemComponent> finalItems = new ArrayList<>();
-
+                    if (checkoutStatus.equals("y")) {
+                        // facade
+                        CheckoutFacade checkoutFacade = new CheckoutFacade();
                         // tambahkan decorator
-                        for(TransactionItem item : cart.getItems()) {
-                            ItemComponent decoratedItem = item;
-                            if(kado.equals("y")) {
-                                decoratedItem = new GiftWrap(decoratedItem);
-                            }
-                            if(guarantee.equals("y")) {
-                                decoratedItem = new FragileGuarantee(decoratedItem);
-                            }
-                            finalItems.add(decoratedItem);
-                        }
-
-                        // hitung total
-                        double subtotal = 0;
-                        for(ItemComponent item : finalItems) {
-                            subtotal += item.getPrice();
-                        }
+                        checkoutFacade.addAddons(cart, giftWrapper, guarantee);
 
                         // tambah ongkir
-                        DeliveryContext deliveryStrategy = new DeliveryContext();
-
-                        if(deliveryMethod.equals("1")){
-                            deliveryStrategy.setDeliveryStrategy(new RegularDelivery());
-                        } else {
-                            deliveryStrategy.setDeliveryStrategy(new ExpressDelivery());
-                        }
-
-                        double deliveryFee = deliveryStrategy.calculateFee();
-
-                        double total = subtotal + deliveryFee;
+                        checkoutFacade.addShippingMethod(deliveryMethod);
                         
                         System.out.println("Silahkan lakukan pembayaran anda...");
-                        
                         // suruh user bayar sesuai dengan strategi yang dipilih
-                        PaymentContext payment = new PaymentContext();
-                        if(paymentMethod.equals("1")){
-                            payment.setPayementStrategy(new VirtualAccount());
-                        } else {
-                            payment.setPayementStrategy(new Gopay());
-                        }
+                        checkoutFacade.addPaymentMethod(paymentMethod);
 
-                        payment.executeStrategy(total);
+                        // bayar
+                        checkoutFacade.pay();
+                        // =================== END OF CHECKOUT LOGIC ====================
 
+                        // Perbarui database
                         for(TransactionItem item : cart.getItems()){
                             database.updateProductStock(item.getProduct(), item.getQuantitiy());
                         }
-                        database.addTransactionHistory(new Transaction(finalItems, deliveryStrategy, payment, subtotal, deliveryFee, total));
+                        database.addTransactionHistory(checkoutFacade.getTransaction());
                         cart.clearCart();
                         System.out.println("Checkout berhasil!");
-                        deliveryStrategy.deliver();
                     } else {
                         System.out.println("Checkout dibatalkan.");
                     }

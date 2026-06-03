@@ -7,7 +7,7 @@ public class FragileGuarantee extends ItemDecorator{
 
     @Override
     public String getDetails() {
-        return wrappee.getDetails() + " + garansi pecah belah ";
+        return wrappee.getDetails() + " + Garansi Pecah Belah ";
     }
 
     @Override
