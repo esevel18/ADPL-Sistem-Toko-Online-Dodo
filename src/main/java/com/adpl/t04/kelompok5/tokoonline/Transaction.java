@@ -1,4 +1,4 @@
-package com.adpl.t04.kelompok5.tokoonline.Builder;
+package com.adpl.t04.kelompok5.tokoonline;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -13,6 +13,7 @@ import com.adpl.t04.kelompok5.tokoonline.Strategy.PaymentContext;
 
 // reason: parameter semakin banyak yang harus dimasukkan saat creational
 // It helps in creating immutable objects in a clean and readable way.
+
 public class Transaction {
     private List<ItemComponent> items;
     private DeliveryContext deliveryStrategy;

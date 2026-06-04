@@ -56,6 +56,7 @@ public class Main {
                     System.out.println("Ketik '$' untuk melihat keranjang dan checkout");
                     // update stock realtime (state yang jika user checkout batal, database asli tidak keganti)
                     DatabaseConnection copyOfDatabase = database.getCopyOfDatabase();
+
                     while (true) {
                         System.out.print("Pilih produk yang diinginkan: ");
                         String productCode = sc.nextLine().trim().toLowerCase();
@@ -214,6 +215,7 @@ public class Main {
                         cart.clearCart();
                         System.out.println("Checkout berhasil!");
                     } else {
+                        cart.clearCart();
                         System.out.println("Checkout dibatalkan.");
                     }
                 }

@@ -26,6 +26,15 @@ public class Product {
         this.category = category;
     }
 
+    public Product(Product product){
+        this.id = product.id;
+        this.name = product.name;
+        this.price = product.price;
+        this.stock = product.stock;
+        this.status = product.status;
+        this.category = product.category;
+    }
+
     @Override
     public String toString() {
         String s = String.format(
