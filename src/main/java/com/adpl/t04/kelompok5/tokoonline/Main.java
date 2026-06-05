@@ -212,12 +212,11 @@ public class Main {
                             database.updateProductStock(item.getProduct(), item.getQuantitiy());
                         }
                         database.addTransactionHistory(checkoutFacade.getTransaction());
-                        cart.clearCart();
                         System.out.println("Checkout berhasil!");
                     } else {
-                        cart.clearCart();
                         System.out.println("Checkout dibatalkan.");
                     }
+                    cart.clearCart();
                 }
 
                 case "2" -> {
